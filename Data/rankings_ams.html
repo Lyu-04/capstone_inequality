@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amsterdam Neighborhood Rankings</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #fff; color: #111; padding: 2rem; }
+    h1 { font-size: 18px; font-weight: 500; margin-bottom: 1.5rem; }
+    .controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+    .controls input { flex: 1; min-width: 160px; padding: 7px 10px; border-radius: 8px; border: 0.5px solid #ccc; font-size: 13px; }
+    .controls select { padding: 7px 10px; border-radius: 8px; border: 0.5px solid #ccc; font-size: 13px; background: #fff; }
+    .tbl-wrap { overflow-x: auto; border-radius: 12px; border: 0.5px solid #e0e0e0; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f5f5f5; padding: 8px 12px; text-align: left; font-weight: 500; color: #666; border-bottom: 0.5px solid #e0e0e0; white-space: nowrap; cursor: pointer; }
+    th:hover { color: #111; }
+    td { padding: 8px 12px; border-bottom: 0.5px solid #e0e0e0; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+    .bar-wrap { display: flex; align-items: center; gap: 6px; }
+    .bar { height: 8px; border-radius: 4px; min-width: 2px; }
+    .val { font-size: 12px; color: #666; min-width: 40px; }
+    .pill { font-size: 11px; padding: 2px 8px; border-radius: 20px; display: inline-block; }
+    .count { font-size: 12px; color: #999; margin-bottom: 8px; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #1a1a1a; color: #eee; }
+      .controls input, .controls select { background: #2a2a2a; color: #eee; border-color: #444; }
+      th { background: #2a2a2a; color: #aaa; border-color: #333; }
+      td { border-color: #333; }
+      tr:hover td { background: #222; }
+      .tbl-wrap { border-color: #333; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Amsterdam neighborhood rankings</h1>
+
+  <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px">
+    <label for="file-upload" style="font-size:13px;padding:7px 14px;border-radius:8px;border:0.5px solid #ccc;cursor:pointer;background:#f5f5f5">upload json</label>
+    <input id="file-upload" type="file" accept=".json" style="display:none" onchange="loadJSON(this)">
+    <span id="file-name" style="font-size:12px;color:#999">no file loaded</span>
+  </div>
+
+  <div class="controls">
+    <input id="search" placeholder="search neighborhood or variable..." oninput="render()">
+    <select id="filter-var" onchange="render()"></select>
+    <select id="sort-dir" onchange="render()">
+      <option value="desc">highest first</option>
+      <option value="asc">lowest first</option>
+    </select>
+  </div>
+  <div class="count" id="count"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="toggleSort('neighborhood')">neighborhood <span id="arr-neighborhood"></span></th>
+          <th onclick="toggleSort('variable')">variable <span id="arr-variable"></span></th>
+          <th onclick="toggleSort('top_val')" style="min-width:300px">top 3 groups <span id="arr-top_val">↓</span></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const SKIP_COLS = new Set(['id','name','type','outcome','gemeentecode','gemeentenaam']);
+    const PALETTE = ['#378ADD','#1D9E75','#D85A30','#D4537E','#BA7517','#7F77DD','#639922','#E24B4A'];
+    let ROWS = [], allVars = [], VAR_COLORS = {}, maxByVar = {};
+    let sortCol = 'top_val', sortDir = 'desc';
+
+    function loadJSON(input) {
+      const file = input.files[0];
+      if (!file) return;
+      document.getElementById('file-name').textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const raw = JSON.parse(e.target.result);
+          processData(raw);
+        } catch {
+          document.getElementById('file-name').textContent = 'invalid JSON file';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function processData(raw) {
+      ROWS = raw.map(d => {
+        const variable = d.outcome || d.variable || '';
+        const neighborhood = d.name || d.neighborhood || '';
+        const entries = Object.entries(d)
+          .filter(([k, v]) => !SKIP_COLS.has(k) && v !== null && !isNaN(v))
+          .map(([k, v]) => ({ k, v: parseFloat(v) }))
+          .sort((a, b) => b.v - a.v)
+          .slice(0, 3);
+        return {
+          neighborhood,
+          variable,
+          top_vars: entries.map(e => e.k),
+          top_vals: entries.map(e => e.v),
+          top_val: entries[0] ? entries[0].v : 0
+        };
+      });
+
+      allVars = [...new Set(ROWS.map(d => d.variable))];
+      allVars.forEach((v, i) => VAR_COLORS[v] = PALETTE[i % PALETTE.length]);
+      allVars.forEach(v => {
+        maxByVar[v] = Math.max(...ROWS.filter(d => d.variable === v).map(d => d.top_val));
+      });
+
+      buildVarFilter();
+      render();
+    }
+
+    function toggleSort(col) {
+      if (sortCol === col) sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+      else { sortCol = col; sortDir = 'desc'; }
+      document.getElementById('sort-dir').value = sortDir;
+      render();
+    }
+
+    function buildVarFilter() {
+      const sel = document.getElementById('filter-var');
+      sel.innerHTML = '<option value="">all variables</option>' +
+        allVars.map(v => `<option value="${v}">${v}</option>`).join('');
+    }
+
+    function render() {
+      const q = document.getElementById('search').value.toLowerCase();
+      const filterVar = document.getElementById('filter-var').value;
+      sortDir = document.getElementById('sort-dir').value;
+
+      let rows = ROWS.filter(d =>
+        (d.neighborhood.toLowerCase().includes(q) || d.variable.toLowerCase().includes(q) || d.top_vars.join(' ').toLowerCase().includes(q)) &&
+        (filterVar === '' || d.variable === filterVar)
+      );
+
+      rows.sort((a, b) => {
+        let va = a[sortCol], vb = b[sortCol];
+        if (va < vb) return sortDir === 'asc' ? -1 : 1;
+        if (va > vb) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      ['neighborhood','variable','top_val'].forEach(c => {
+        const el = document.getElementById('arr-' + c);
+        if (el) el.textContent = sortCol === c ? (sortDir === 'desc' ? '↓' : '↑') : '';
+      });
+
+      document.getElementById('count').textContent = rows.length + ' neighborhoods';
+
+      document.getElementById('tbody').innerHTML = rows.map(d => {
+        const color = VAR_COLORS[d.variable] || '#888';
+        const max = maxByVar[d.variable] || 1;
+        const bars = d.top_vars.map((v, i) => {
+          const w = Math.round((d.top_vals[i] / max) * 100);
+          return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <span style="font-size:11px;color:#888;min-width:180px">${v.replace(/_/g,' ')}</span>
+            <div class="bar" style="width:${w}px;background:${color}"></div>
+            <span class="val">${d.top_vals[i].toFixed(2)}</span>
+          </div>`;
+        }).join('');
+        return `<tr>
+          <td style="font-weight:500">${d.neighborhood}</td>
+          <td><span class="pill" style="background:${color}22;color:${color}">${d.variable}</span></td>
+          <td>${bars}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    document.getElementById('count').textContent = 'upload a json file to get started';
+  </script>
+</body>
+</html>
