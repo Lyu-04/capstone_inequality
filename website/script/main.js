@@ -575,7 +575,7 @@ async function showInterventions(neighborhoodName) {
   list.style.display = 'flex';
   list.innerHTML = `<p style="color:#9CA3AF; font-size:12px; font-style:italic;">Loading recommendations...</p>`;
 
-  const GEMINI_API_KEY = 'AIzaSyBIDyWUJkjuTe8Zgmo3IFnY7oXEo60m7xM';
+  const GEMINI_API_KEY = 'GEMINI_API_KEY';
 
   try {
     const response = await fetch(
