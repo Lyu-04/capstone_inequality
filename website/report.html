@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysis Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #f9fafb;
+    }
+    .navbar {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar a {
+      text-decoration: none;
+      color: #374151;
+      margin-left: 2rem;
+      font-weight: 500;
+    }
+    .navbar a:hover {
+      color: #111827;
+    }
+    .report-container {
+      max-width: 900px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .report-header {
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 2rem;
+      margin-bottom: 2rem;
+    }
+    .report-title {
+      font-size: 2rem;
+      color: #111827;
+      margin: 0 0 0.5rem 0;
+    }
+    .report-subtitle {
+      color: #6b7280;
+      margin: 0;
+    }
+    .report-section {
+      margin-bottom: 2rem;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      color: #111827;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .summary-item {
+      padding: 1rem;
+      background: #f3f4f6;
+      border-radius: 0.5rem;
+    }
+    .summary-label {
+      font-size: 0.85rem;
+      color: #6b7280;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    .summary-value {
+      font-size: 1.1rem;
+      color: #111827;
+      font-weight: 600;
+    }
+    .placeholder-section {
+      padding: 2rem;
+      background: #f3f4f6;
+      border-radius: 0.5rem;
+      color: #6b7280;
+      text-align: center;
+      font-style: italic;
+    }
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      justify-content: center;
+    }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <strong>Inequality Explorer</strong>
+    </div>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="i_map.html">Overview</a>
+    </div>
+  </nav>
+
+  <div class="report-container">
+    <div class="report-header">
+      <h1 class="report-title" id="reportTitle">Analysis Report</h1>
+      <p class="report-subtitle">Based on your selected criteria</p>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="report-section">
+      <h2 class="section-title">Your Selections</h2>
+      <div class="summary-grid" id="summaryGrid">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- Analysis Section -->
+    <div class="report-section">
+      <h2 class="section-title">Analysis</h2>
+      <div class="placeholder-section">Placeholder: Detailed analysis will appear here based on your selections.</div>
+    </div>
+
+    <!-- Visualizations Section -->
+    <div class="report-section">
+      <h2 class="section-title">Visualizations</h2>
+      <div class="placeholder-section">Placeholder: Charts and visualizations will appear here.</div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="button-group">
+      <a href="analysis.html" class="btn btn-secondary">← Back to Analysis</a>
+      <a href="i_map.html" class="btn btn-primary">Go to Overview →</a>
+    </div>
+  </div>
+
+  <script src="script/analysis.js"></script>
+</body>
+</html>

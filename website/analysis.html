@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysis Questionnaire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #f9fafb;
+    }
+    .navbar {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar a {
+      text-decoration: none;
+      color: #374151;
+      margin-left: 2rem;
+      font-weight: 500;
+    }
+    .navbar a:hover {
+      color: #111827;
+    }
+    .analysis-container {
+      max-width: 600px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #3b82f6;
+      transition: width 0.3s;
+    }
+    .progress-text {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .question-title {
+      font-size: 1.5rem;
+      color: #111827;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    .question-step {
+      display: none;
+    }
+    .question-step.active {
+      display: block;
+    }
+    .options-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .option-button {
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      background: white;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+    .option-button:hover {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+    .option-button.selected {
+      border-color: #3b82f6;
+      background: #3b82f6;
+      color: white;
+    }
+    .checkbox-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .checkbox-item:hover {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+    .checkbox-item input {
+      margin-right: 0.75rem;
+      cursor: pointer;
+    }
+    .checkbox-item.checked {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+    .slider-container {
+      margin-bottom: 2rem;
+    }
+    .slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #e5e7eb;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+    }
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      border: none;
+    }
+    .slider-value {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #d1d5db;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+      flex: 1;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #2563eb;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .error-message {
+      color: #ef4444;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .error-message.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <strong>Inequality Explorer</strong>
+    </div>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="i_map.html">Overview</a>
+    </div>
+  </nav>
+
+  <div class="analysis-container">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+    </div>
+    <div class="progress-text" id="progressText">Question 1 of 4</div>
+
+    <!-- Question 1: Neighbourhood Selection -->
+    <div class="question-step active" id="step-1">
+      <div class="question-title">Which neighbourhood do you want to see?</div>
+      <div class="options-container" id="neighbourhoods-container">
+        <!-- Placeholder options -->
+        <button class="option-button" onclick="selectOption(1, 'Amsterdam Noord')">Amsterdam Noord</button>
+        <button class="option-button" onclick="selectOption(1, 'Amsterdam Oost')">Amsterdam Oost</button>
+        <button class="option-button" onclick="selectOption(1, 'Amsterdam West')">Amsterdam West</button>
+        <button class="option-button" onclick="selectOption(1, 'Amsterdam Zuid')">Amsterdam Zuid</button>
+      </div>
+      <div class="error-message" id="error-1">Please select a neighbourhood</div>
+    </div>
+
+    <!-- Question 2: Solo or Compare -->
+    <div class="question-step" id="step-2">
+      <div class="question-title">Only this neighbourhood or compare it with another?</div>
+      <div class="options-container">
+        <button class="option-button" onclick="selectOption(2, 'Solo')">Solo View</button>
+        <button class="option-button" onclick="selectOption(2, 'Compare')">Compare</button>
+      </div>
+      <div class="error-message" id="error-2">Please select an option</div>
+    </div>
+
+    <!-- Question 3: Select Domains -->
+    <div class="question-step" id="step-3">
+      <div class="question-title">Select domain(s)</div>
+      <div class="checkbox-container">
+        <label class="checkbox-item">
+          <input type="checkbox" value="Health" onchange="selectDomain('Health')">
+          <span>Health</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" value="Income" onchange="selectDomain('Income')">
+          <span>Income</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" value="Housing" onchange="selectDomain('Housing')">
+          <span>Housing</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" value="Education" onchange="selectDomain('Education')">
+          <span>Education</span>
+        </label>
+      </div>
+      <div class="error-message" id="error-3">Please select at least one domain</div>
+    </div>
+
+    <!-- Question 4: Income Group Slider -->
+    <div class="question-step" id="step-4">
+      <div class="question-title">Select income group</div>
+      <div class="slider-container">
+        <input type="range" min="0" max="80000" value="40000" class="slider" id="incomeSlider" oninput="updateIncomeDisplay()">
+        <div class="slider-value" id="incomeValue">€40,000</div>
+      </div>
+      <div class="error-message" id="error-4">Please select an income group</div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="button-group">
+      <button class="btn btn-secondary" id="backBtn" onclick="previousStep()" style="display: none;">← Back</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+
+  <script src="script/analysis.js"></script>
+</body>
+</html>
