@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amsterdam Neighborhood Map</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+  <link rel="stylesheet" href="style/style.css">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  
+</head>
+<body>
+
+  <div id="map"></div>
+  
+
+  <div class="panel">
+    <h2 class="panel-title">Explore Inequality</h2>
+    <p class="panel-subtitle">Select or combine indicators to explore inequality patterns</p>
+
+    <div class="indicators-list">
+      <button class="indicator-item" onclick="toggleIndicator(this)">
+        <div class="indicator-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="1.67" y="4.17" width="16.68" height="8.33" stroke="#4A5565" stroke-width="1.67"/>
+            <rect x="5" y="10.42" width="10" height="5.42" stroke="#4A5565" stroke-width="1.67"/>
+          </svg>
+        </div>
+        <span class="indicator-label">Education</span>
+        <span class="selected-badge">✓ selected</span>
+      </button>
+
+      <button class="indicator-item" onclick="toggleIndicator(this)">
+        <div class="indicator-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="1.67" y="2.5" width="16.67" height="15" stroke="#4A5565" stroke-width="1.67"/>
+          </svg>
+        </div>
+        <span class="indicator-label">Health</span>
+        <span class="selected-badge">✓ selected</span>
+      </button>
+
+      <button class="indicator-item active" onclick="toggleIndicator(this)">
+        <div class="indicator-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="5.1" y="4.25" width="10.2" height="11.9" stroke="#BB4D00" stroke-width="1.7"/>
+          </svg>
+        </div>
+        <span class="indicator-label">Income</span>
+        <span class="selected-badge">✓ selected</span>
+      </button>
+
+      <button class="indicator-item" onclick="toggleIndicator(this)">
+        <div class="indicator-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="2.5" y="1.67" width="15" height="15.83" stroke="#4A5565" stroke-width="1.67"/>
+            <rect x="7.5" y="10" width="5" height="7.5" stroke="#4A5565" stroke-width="1.67"/>
+          </svg>
+        </div>
+        <span class="indicator-label">Housing</span>
+        <span class="selected-badge">✓ selected</span>
+      </button>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Parental Income Level</span>
+      <div class="custom-select">
+        <button class="select-trigger" onclick="toggleSelect('income')">
+          <span class="select-trigger-text" id="income-text">Select level...</span>
+          <span class="select-arrow">▼</span>
+        </button>
+        <div class="select-dropdown" id="income-dropdown">
+          <div class="select-option" onclick="selectOption('income', 'All')">All</div>
+          <div class="select-option" onclick="selectOption('income', 'Low')">Low</div>
+          <div class="select-option" onclick="selectOption('income', 'Mid')">Mid</div>
+          <div class="select-option" onclick="selectOption('income', 'High')">High</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-footer">
+      <span class="footer-text" id="footer-text">1 indicator selected</span>
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <div class="hover-panel" id="hover-panel">
+  <div class="hover-panel-header">
+    <div class="hover-panel-name" id="hover-name"></div>
+  </div>
+  <div class="hover-panel-body" id="hover-indicators"></div>
+</div>
+
+<div class="detail-panel" id="detail-panel">
+<div class="detail-page" id="detail-page-1">
+  <div class="detail-panel-header">
+    <div class="detail-panel-name" id="detail-name"></div>
+    <div class="detail-header-actions">
+      <button class="view-more-btn" onclick="switchPage(2)">View more →</button>
+      <button class="detail-panel-close" onclick="closeDetailPanel()">✕</button>
+    </div>
+  </div>
+  <div id="detail-body"></div>
+  <!-- Buttons fixed outside scrollable area -->
+  <div id="detail-actions" class="detail-actions"></div>
+</div>
+
+  <!-- Page 2 -->
+  <div class="detail-page" id="detail-page-2" style="display:none;">
+  <div class="detail-panel-header">
+    <div class="detail-panel-name" id="detail-name-2"></div>
+    <div class="detail-header-actions">
+      <button class="view-more-btn" onclick="switchPage(1)">← Back</button>
+      <button class="detail-panel-close" onclick="closeDetailPanel()">✕</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="detail-tabs" id="detail-tabs">
+    <div class="detail-tab active" onclick="switchTab('Health')">Health</div>
+    <div class="detail-tab" onclick="switchTab('Education')">Education</div>
+    <div class="detail-tab" onclick="switchTab('Income')">Income</div>
+    <div class="detail-tab" onclick="switchTab('Housing')">Housing</div>
+  </div>
+
+  <!-- Tab content -->
+  <div class="detail-panel-body" id="detail-body-2">
+    <!-- Fill later -->
+  </div>
+</div>
+</div>
+
+
+
+<div id="narrative-modal">
+  <div class="narrative-modal-overlay" onclick="closeNarrative()"></div>
+  <div class="narrative-modal-box">
+    <div class="narrative-modal-header">
+      <div class="narrative-modal-title" id="narrative-modal-title"></div>
+      <button class="narrative-modal-close" onclick="closeNarrative()">✕</button>
+    </div>
+    <div id="narrative-modal-body">
+      <div id="narrative-loading">
+        <div class="narrative-spinner"></div>
+        <p>Generating neighborhood narrative...</p>
+      </div>
+      <div id="narrative-content"></div>
+    </div>
+  </div>
+</div>
+
+<script src="script/main.js"></script>
+
+
+
+</body>
+</html>
